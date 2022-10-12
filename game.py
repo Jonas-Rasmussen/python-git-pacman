@@ -8,7 +8,8 @@ pg.init()
 screen = pg.display.set_mode((600,700))
 pg.display.set_caption("Pac-Man (clone)")
 
-
+width = 600
+height = 600
 
 ## Load images ##
 pacman_images = []
@@ -16,6 +17,16 @@ for i in range(6):
     img = pg.image.load(f"images/pacman_{i}.png")
     img = pg.transform.scale(img, (32,32))
     pacman_images.append(img)
+
+img_ghost = pg.image.load("ghost.png")
+ghost_width = img_ghost.get_rect().size[0]
+ghost_height = img_ghost.get_rect().size[1]
+
+ghosts = []
+for i in range(5):
+    x = random.randint(0,width-ghost_width)
+    ghost = [x,0]
+    ghosts.append(ghost)
 
 pg.mixer.pre_init(44100, 32, 2, 1024)
 pg.mixer.get_init()
@@ -108,11 +119,29 @@ while running:
         screen.blit(pg.transform.rotate(pacman_images[r],90), (x, y))
     else:
         screen.blit(pacman_images[0], (x, y))
-            
+    
 
-    # Update screen
-    pg.display.flip()
+    for ghost in ghosts:
+        # Does jet overlap alien in x-direction
+        if ghost[0]< pacman_images_x and pacman_images_x < ghost[0]+ghost_width:
+            if ghost[1]< pacman_images_y and pacman_images_y < ghost[1]+ghost_height:
+                text = game_over_font.render("GAME OVER", True, (255,255,255))
+                screen.blit(text, (170,250))
+                while is_running: # While-loop
 
-    # Framerate (limit by doing nothing)
-    tick += 1
-    time.sleep(0.05)
+    
+                    #event handling
+                    events = pg.event.get()
+                    for event in events:
+                    #print("Event",event.type,event)
+                        if event.type==pg.QUIT:
+                            is_running=False
+                    pg.display.update()
+                    time.sleep(0.15)
+
+# Update screen
+pg.display.flip()
+
+# Framerate (limit by doing nothing)
+tick += 1
+time.sleep(0.05)
